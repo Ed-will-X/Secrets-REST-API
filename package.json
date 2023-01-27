@@ -7,7 +7,10 @@
     "start": "node src/index.js",
     "dev": "env-cmd -f ./config/dev.env nodemon src/index.js",
     "start-mongo": "/Users/maste/mongoDB/bin/mongod.exe --dbpath=/Users/maste/mongoDB-data",
-    "test": ""
+    "test": "env-cmd -f ./config/test.env jest --runInBand"
+  },
+  "jest": {
+    "testEnvoronment": "node"
   },
   "keywords": [],
   "author": "",

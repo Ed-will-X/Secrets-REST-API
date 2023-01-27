@@ -1,5 +1,8 @@
 const mongoose = require("mongoose")
 const validator = require("validator")
+const bcrypt = require("bcryptjs")
+
+const authUtils = require("../utils/auth_utils")
 
 const userSchema = new mongoose.Schema({
     username: {
@@ -34,7 +37,8 @@ const userSchema = new mongoose.Schema({
     },
     gender: {
         type: Number,
-        required: true
+        required: true,
+        default: 0
     },
     secrets: {
         type: Array,
@@ -65,7 +69,42 @@ const userSchema = new mongoose.Schema({
             required: true
         }
     }]
+}, {
+    timestamps: true
 })
+
+authUtils.generateToken(userSchema)
+authUtils.hashPassword(userSchema)
+
+userSchema.statics.findByCredentials = async function(email, password) {
+    const user = await User.findOne({ email: email }).exec()
+    
+
+    if(!user) {
+        console.error("User is null")
+        return {
+            error_title: "Can't find Account",
+            error_message: `Can't find account with the email ${email}`,
+            status: 404,
+            isError: true
+        }
+    } else {
+        const isMatch = await bcrypt.compare(password, user.password)
+
+        if(!isMatch) {
+            console.error("No match")
+            return {
+                error_title: "Incorrect Password",
+                error_message: `The password supplied is incorrect.`,
+                status: 401,
+                isError: true
+            }
+        }
+    }
+
+    return user
+
+}
 
 const User = mongoose.model("User", userSchema)
 

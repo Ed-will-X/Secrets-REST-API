@@ -57,6 +57,8 @@ const secretSchema = new mongoose.Schema({
             },
         }]
     }]
+}, {
+    timestamps: true
 })
 
 
