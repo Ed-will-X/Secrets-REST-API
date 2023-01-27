@@ -3,6 +3,7 @@ const auth_controller = require("../controllers/auth_controller")
 const user_constroller = require("../controllers/user_controller")
 const auth = require("../middlewares/auth")
 
+
 const router = express.Router()
 
 router.get("/", (req, res)=> {
@@ -12,6 +13,7 @@ router.get("/", (req, res)=> {
 router.post("/signup", auth_controller.signUp)
 router.post("/signin", auth_controller.signIn)
 router.get("/profile", auth, user_constroller.getProfile)
+router.patch("/profile", auth, user_constroller.editProfile)
 router.post("/signout", auth, auth_controller.signOut)
 router.post("/signout-all", auth, auth_controller.signoutAll)
 

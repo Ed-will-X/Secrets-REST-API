@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
+const User = require("../models/User")
 
 const verifyToken = (Schema) => {
     return async(req, res, next)=>{
@@ -26,6 +27,63 @@ const verifyToken = (Schema) => {
             res.status(401).send({
                 error: "please authenticate"
             })
+        }
+    }
+}
+
+const validate_action_between_users = (Schema) => {
+    return async(req, res, next) => {
+        // check block status,
+        // check private status
+        // check if both users are the same
+
+        try {
+            const user = await Schema.findOne({ username: req.params.username })
+
+            if(user == null) {
+                return res.status(404).send({ error: "User not found" })
+            }
+            
+            if(req.user._id.toString() === user._id.toString()) {
+                return res.status(403).send({ error: "You can't perform this operation on yourself" })
+            }
+
+            if(user.blocked.includes(req.user._id.toString())) {
+                return res.status(401).send({ error: "Lack of authorisation to perform this operation on this user" })
+            }
+
+            next()
+        } catch (error) {
+            console.log(error)
+            return res.status(500).send({ error: "Internal server error" })
+        }
+    }
+}
+
+const validate_action_between_users_blocked = (Schema) => {
+    return async(req, res, next) => {
+        // check block status,
+        // check if both users are the same
+
+        try {
+            const user = await Schema.findOne({ username: req.params.username })
+
+            if(user == null) {
+                return res.status(404).send({ error: "User not found" })
+            }
+            
+            if(req.user._id.toString() === user._id.toString()) {
+                return res.status(403).send({ error: "You can't perform this operation on yourself" })
+            }
+
+            if(user.blocked.includes(req.user._id.toString())) {
+                return res.status(401).send({ error: "Lack of authorisation to perform this operation on this user" })
+            }
+
+            next()
+        } catch (error) {
+            console.log(error)
+            return res.status(500).send({ error: "Internal server error" })
         }
     }
 }
@@ -59,5 +117,7 @@ function hashPassword(Schema) {
 module.exports = {
     verifyToken,
     hashPassword,
-    generateToken
+    generateToken,
+    validate_action_between_users,
+    validate_action_between_users_blocked
 }

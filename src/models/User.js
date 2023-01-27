@@ -64,7 +64,15 @@ const userSchema = new mongoose.Schema({
         type: Array,
         default: []
     },
+    followRequests: {
+        type: Array,
+        default: []
+    },
     blocked: {
+        type: Array,
+        default: []
+    },
+    blockedBy: {
         type: Array,
         default: []
     },

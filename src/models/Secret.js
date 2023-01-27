@@ -26,6 +26,10 @@ const secretSchema = new mongoose.Schema({
         required: true,
         default: false
     },
+    headerImageChangeTimestamp: {
+        type: Number,
+        default: -1
+    },
     liked: {
         type: Array,
         default: []
