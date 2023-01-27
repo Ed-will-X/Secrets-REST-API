@@ -14,8 +14,26 @@ const secretSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    image: {
+    headerImage: {
         type: Buffer
+    },
+    images: {
+        type: Array,
+        default: []
+    },
+    edited: {
+        type: Boolean,
+        required: true,
+        default: false
+    },
+    liked: {
+        type: Array,
+        default: []
+    },
+    private: {
+        type: Boolean,
+        required: true,
+        default: true
     },
     comments: [{
         user: {

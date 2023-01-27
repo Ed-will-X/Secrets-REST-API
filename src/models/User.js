@@ -35,6 +35,11 @@ const userSchema = new mongoose.Schema({
         type: Array,
         default: []
     },
+    private: {
+        type: Boolean,
+        required: true,
+        default: false
+    },
     gender: {
         type: Number,
         required: true,
@@ -60,6 +65,10 @@ const userSchema = new mongoose.Schema({
         default: []
     },
     blocked: {
+        type: Array,
+        default: []
+    },
+    savedPosts: {
         type: Array,
         default: []
     },

@@ -12,6 +12,9 @@ router.get("/", (req, res)=> {
 router.post("/signup", auth_controller.signUp)
 router.post("/signin", auth_controller.signIn)
 router.get("/profile", auth, user_constroller.getProfile)
+router.post("/signout", auth, auth_controller.signOut)
+router.post("/signout-all", auth, auth_controller.signoutAll)
+
 router.get('/test', (req, res)=> {
     res.send({ name: "test" })
 })
