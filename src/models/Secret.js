@@ -1,7 +1,7 @@
 const mongoose = require("mongoose")
 
 const secretSchema = new mongoose.Schema({
-    user_id: {
+    owner_id: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
         ref: "User"
@@ -26,6 +26,19 @@ const secretSchema = new mongoose.Schema({
         required: true,
         default: false
     },
+    entries: {
+        type: Array,
+        required: true
+    },
+    // lastUpdated: {
+    //     type: Number,
+    //     required: true
+    // },
+    NSFW: {
+        type: Boolean,
+        required: true,
+        default: false
+    },
     headerImageChangeTimestamp: {
         type: Number,
         default: -1
@@ -38,6 +51,11 @@ const secretSchema = new mongoose.Schema({
         type: Boolean,
         required: true,
         default: true
+    },
+    date: {
+        type: String,
+        required: true,
+        unique: true
     },
     comments: [{
         user: {

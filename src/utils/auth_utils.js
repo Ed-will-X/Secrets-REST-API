@@ -31,17 +31,19 @@ const verifyToken = (Schema) => {
     }
 }
 
+// checks block status, private status, if both users are the same and null user
 const validate_action_between_users = (Schema) => {
     return async(req, res, next) => {
-        // check block status,
-        // check private status
-        // check if both users are the same
 
         try {
             const user = await Schema.findOne({ username: req.params.username })
 
             if(user == null) {
                 return res.status(404).send({ error: "User not found" })
+            }
+            
+            if(user.private && user.followers.includes(req.user._id) === false) {
+                return res.status(401).send({ error: "Lack of authorisation to perform this operation on this user" })
             }
             
             if(req.user._id.toString() === user._id.toString()) {
@@ -60,11 +62,9 @@ const validate_action_between_users = (Schema) => {
     }
 }
 
+// checks block status, if both users are the same and null user
 const validate_action_between_users_blocked = (Schema) => {
     return async(req, res, next) => {
-        // check block status,
-        // check if both users are the same
-
         try {
             const user = await Schema.findOne({ username: req.params.username })
 
@@ -87,6 +87,8 @@ const validate_action_between_users_blocked = (Schema) => {
         }
     }
 }
+
+
 
 function generateToken(Schema) {
     Schema.methods.generateToken = async function() {
@@ -119,5 +121,5 @@ module.exports = {
     hashPassword,
     generateToken,
     validate_action_between_users,
-    validate_action_between_users_blocked
+    validate_action_between_users_blocked,
 }

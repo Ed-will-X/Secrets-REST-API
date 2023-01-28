@@ -31,6 +31,13 @@ const userSchema = new mongoose.Schema({
         trim: true,
         minlength: [ 8, "Password too short" ]
     },
+    // TODO: Uncomment and implement validation
+    // DOB: {
+    //     type: String,
+    //     required: true,
+    //     minlength: [ 10, "Date of birth too short" ],
+    //     maxLength: [ 10, "Date of birth too long" ]
+    // },
     likedSecrets: {
         type: Array,
         default: []
@@ -44,10 +51,6 @@ const userSchema = new mongoose.Schema({
         type: Number,
         required: true,
         default: 0
-    },
-    secrets: {
-        type: Array,
-        default: []
     },
     imageChangeTimestamp: {
         type: Number,
@@ -88,6 +91,12 @@ const userSchema = new mongoose.Schema({
     }]
 }, {
     timestamps: true
+})
+
+userSchema.virtual("secrets", {
+    ref: "Secret",
+    localField: "_id",
+    foreignField: "owner"
 })
 
 authUtils.generateToken(userSchema)

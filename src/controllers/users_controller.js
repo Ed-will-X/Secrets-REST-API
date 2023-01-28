@@ -182,9 +182,18 @@ module.exports = {
     },
     getProfile: async(req, res)=> {
         try {
-            
+            const user = await User.findOne({ username: req.params.username })
+
+            if(user.private && user.followers.includes(req.user._id) === false) {
+                return res.send({
+                    user: userUtils.hide_props_in_js_object(user.toObject(), userConstants.private_data)
+                })
+            }
+
+            return res.send({ user: userUtils.hide_props_in_js_object(user.toObject(), userConstants.props_to_hide) })
         } catch (error) {
-            
+            console.log(error)
+            return res.status(500).send({ error: "Internal server error" })
         }
     }
 }

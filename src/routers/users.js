@@ -18,6 +18,6 @@ router.post("/users/:username/revoke-follow-request", auth, validateBlocked, use
 router.post("/profile/requests/:username/accept", auth, validateBlocked, users_controller.acceptFollowRequest)
 router.post("/profile/requests/:username/reject", auth, validateBlocked, users_controller.rejectFollowRequest)
 router.post("/profile/followers/:username/remove", auth, validateBlocked, users_controller.removeFollower)
-
+router.get("/users/:username", auth, validateBlocked, users_controller.getProfile)
 
 module.exports = router
