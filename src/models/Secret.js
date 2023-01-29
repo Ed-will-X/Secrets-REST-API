@@ -6,56 +6,60 @@ const secretSchema = new mongoose.Schema({
         required: true,
         ref: "User"
     },
-    title: {
-        type: String,
-        retuired: true,
-    },
-    body: {
+    entryTitle: {
         type: String,
         required: true,
     },
-    headerImage: {
+    entryBody: {
+        type: String,
+        required: true
+    },
+    entryImage: {
         type: Buffer
     },
-    images: {
-        type: Array,
-        default: []
+    mediaType: {
+        type: String,
+        required: true
     },
-    edited: {
+    tags: {
+        type: Array,
+        default: false
+    },
+    isPublic: {
         type: Boolean,
         required: true,
         default: false
     },
-    entries: {
-        type: Array,
+    uploadTimestamp: {
+        type: Number,
         required: true
     },
-    // lastUpdated: {
-    //     type: Number,
-    //     required: true
-    // },
+    lastUpdated: {
+        type: Number,
+        required: true,
+        default: -1
+    },
     NSFW: {
         type: Boolean,
         required: true,
-        default: false
     },
-    headerImageChangeTimestamp: {
+    entryMediaVersion: {
         type: Number,
-        default: -1
+        default: 0
     },
-    liked: {
+    likes: {
         type: Array,
         default: []
-    },
-    private: {
-        type: Boolean,
-        required: true,
-        default: true
     },
     date: {
         type: String,
         required: true,
-        unique: true
+        unique: false
+    },
+    shadowBan: {
+        type: Boolean,
+        required: true,
+        default: true
     },
     comments: [{
         user: {

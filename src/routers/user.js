@@ -7,9 +7,9 @@ const auth = require("../middlewares/auth")
 const router = express.Router()
 
 router.get("/", (req, res)=> {
-    var datetime = new Date();
-    const today = `${datetime.getFullYear()}-${datetime.getMonth() + 1}-${datetime.getDate()}`
-    console.log(today);
+    // var datetime = new Date();
+    // const today = `${datetime.getFullYear()}-${datetime.getMonth() + 1}-${datetime.getDate()}`
+    console.log(Date.now());
 
     res.status(200).send("Success")
 })

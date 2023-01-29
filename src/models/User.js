@@ -42,6 +42,11 @@ const userSchema = new mongoose.Schema({
         type: Array,
         default: []
     },
+    NSFW: {
+        type: Boolean,
+        required: true,
+        default: false
+    },
     private: {
         type: Boolean,
         required: true,
@@ -86,6 +91,16 @@ const userSchema = new mongoose.Schema({
     tokens: [{
         token: {
             type: String,
+            required: true
+        }
+    }],
+    customEntrySort: [{ // TODO: Create custom entry sort
+        date: {
+            type: String,
+            required: true
+        },
+        order: {
+            type: Array,
             required: true
         }
     }]
