@@ -4,7 +4,6 @@ const users_controller = require("../controllers/users_controller")
 const auth_controller = require("../controllers/auth_controller")
 const user_constroller = require("../controllers/user_controller")
 const auth = require("../middlewares/auth")
-const validateRequest = require("../middlewares/validateRequest")
 const validateBlocked = require("../middlewares/validateBlocked")
 
 const router = express.Router()
@@ -19,5 +18,6 @@ router.post("/profile/requests/:username/accept", auth, validateBlocked, users_c
 router.post("/profile/requests/:username/reject", auth, validateBlocked, users_controller.rejectFollowRequest)
 router.post("/profile/followers/:username/remove", auth, validateBlocked, users_controller.removeFollower)
 router.get("/users/:username", auth, validateBlocked, users_controller.getProfile)
-
+router.get("/users/:username/profile-image", auth, validateBlocked, users_controller.getOtherUserProfileImage)
+router.get("/users/search/:term", auth, users_controller.queryUsers)
 module.exports = router

@@ -184,6 +184,8 @@ module.exports = {
         try {
             const user = await User.findOne({ username: req.params.username })
 
+            // TODO: To get NSFW, loop over all posts, if one NSFW is found, return NSFW as part of the user object
+
             if(user.private && user.followers.includes(req.user._id) === false) {
                 return res.send({
                     user: userUtils.hide_props_in_js_object(user.toObject(), userConstants.private_data)
@@ -193,6 +195,41 @@ module.exports = {
             return res.send({ user: userUtils.hide_props_in_js_object(user.toObject(), userConstants.props_to_hide) })
         } catch (error) {
             console.log(error)
+            return res.status(500).send({ error: "Internal server error" })
+        }
+    },
+    getOtherUserProfileImage: async(req, res) => {
+        try {
+            const user = await User.findOne({ username: req.params.username })
+
+            res.set("Content-Type", "image/png")
+
+            return res.send(user.profileImage)
+        } catch (error) {
+            return res.status(500).send({ error: "Internal server error" })
+        }
+    },
+    queryUsers: async(req, res) => {
+        try {
+            const term = req.params.term
+            if(term === "") {
+                return res.send([])
+            }
+
+            let users = await User.find({ username: { "$regex": term } }).limit(parseInt(req.query.limit)).skip(parseInt(req.query.skip))
+
+            for(let i = 0; i < users.length; i++) {
+                if(users[i].username === req.user.username) {
+                    users.splice(i, 1)
+                } else if(users[i].blocked.includes(req.user._id.toString())) {
+                    users.splice(i, 1)
+                }
+            }
+
+            return res.send({ user: userUtils.hidePropsInArray(users, userConstants.search_data_to_hide) })
+
+        } catch(e) {
+            console.log(e)
             return res.status(500).send({ error: "Internal server error" })
         }
     }

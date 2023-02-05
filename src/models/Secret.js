@@ -14,6 +14,11 @@ const secretSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    edited: {
+        type: Boolean,
+        required: true,
+        default: false
+    },
     entryImage: {
         type: Buffer
     },
@@ -23,12 +28,16 @@ const secretSchema = new mongoose.Schema({
     },
     tags: {
         type: Array,
-        default: false
+        default: []
     },
     isPublic: {
         type: Boolean,
         required: true,
         default: false
+    },
+    savedBy: {
+        type: Array,
+        default: []
     },
     uploadTimestamp: {
         type: Number,

@@ -42,10 +42,18 @@ const userSchema = new mongoose.Schema({
         type: Array,
         default: []
     },
+    posts_commented_on: {
+        type: Array,
+        default: []
+    },
     NSFW: {
         type: Boolean,
         required: true,
         default: false
+    },
+    viewedSecrets: {
+        type: Array,
+        default: []
     },
     private: {
         type: Boolean,
@@ -63,6 +71,10 @@ const userSchema = new mongoose.Schema({
     },
     profileImage: {
         type: Buffer
+    },
+    likedComments: {
+        type: Array,
+        default: []
     },
     followers: {
         type: Array,
