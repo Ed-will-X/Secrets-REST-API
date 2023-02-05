@@ -5,11 +5,29 @@ const User = require("../models/User")
 const userUtils = require("../utils/user_utils")
 const userConstants = require("../constants/user_constants")
 const postConstants = require("../constants/post_constants")
+const user_utils = require("../utils/user_utils")
+const users_controller = require("./users_controller")
 
 module.exports = {
     uploadSecret: async(req, res) => {
         try {
             const _id = mongoose.Types.ObjectId()
+
+            if(req.body.tags.length > 10) {
+                return res.status(400).send({ error: "You can't upload more than 10 tags" })
+            }
+
+            let sanitised_tags = []
+            if(req.body.tags.length > 0) {
+                for(let i = 0; i < req.body.tags.length; i++) {
+                    if(req.body.tags[i] === "") {
+                        continue
+                    }
+                    sanitised_tags.push(req.body.tags[i].toLowerCase())
+                }
+            }
+
+            const tags_to_store = [ ...new Set(sanitised_tags) ]
 
             const secret = new Secret({
                 entryTitle: req.body.entryTitle,
@@ -17,10 +35,11 @@ module.exports = {
                 date: req.body.date,
                 uploadTimestamp: Date.now(),
                 owner_id: req.user._id,
-                tags: req.body.tags,
+                tags: tags_to_store,
                 NSFW: req.body.NSFW,
                 mediaType: req.body.mediaType,
-                _id: _id
+                _id: _id,
+                isPublic: req.body.isPublic
             })
 
             await secret.save()
@@ -41,7 +60,7 @@ module.exports = {
              })
         } catch(e) {
             console.log(e)
-            return res.status(500).send({ error: "Internal server error" })
+            return res.status(500).send({ error: e })
         }
     },
     uploadEntryImage: async(req, res) => {
@@ -214,7 +233,7 @@ module.exports = {
             await entry.save()
             await req.user.save()
 
-            return res.send(_id)
+            return res.status(201).send(_id)
         } catch(e) {
             console.log(e)
             return res.status(500).send({ error: "Internal server error" })
@@ -339,10 +358,94 @@ module.exports = {
             return res.status(500).send({ error: "Internal server error" })
         }
     },
-    getComments: async(req, res) => {
-
-    },
     viewSecret: async(req, res) => {
 
-    }
+    },
+    getEntry: async(req, res) => {
+        try {
+            const entry = await Secret.findOne({ _id: req.params.id })
+
+            return res.send({
+                entry: userUtils.hide_props_in_js_object(entry.toObject(), postConstants.props_to_hide)
+            })
+        } catch (error) {
+            console.log(error)
+            return res.status(500).send({ error: "Internal server error" })
+        }
+    },
+    getEntry_min: async(req, res) => {
+        try {
+            const entry = await Secret.findOne({ _id: req.params.id })
+
+            return res.send({
+                entry: userUtils.hide_props_in_js_object(entry.toObject(), postConstants.props_to_hide_query)
+            })
+        } catch (error) {
+            console.log(error)
+            return res.status(500).send({ error: "Internal server error" })
+        }
+    },
+    getEntry_image: async(req, res) => {
+        try {
+            const entry = await Secret.findOne({ _id: req.params.id })
+
+            if(entry.entryImage === undefined) {
+                return res.status(404).send({
+                    error: "Image not found"
+                })
+            }
+            res.set("Content-Type", "image/png")
+
+            return res.send(entry.entryImage)
+        } catch (error) {
+            console.log(error)
+            return res.status(500).send({ error: "Internal server error" })
+        }
+    },
+    queryEntries: async(req, res) => {
+        try {
+            const term = req.params.term
+
+            if(term.length < 4) {
+                return res.send({
+                    entries: []
+                })
+            }
+
+            if(req.query.method === undefined) {
+                return res.status(400).send({ error: "Method must not be undefined" })
+            }
+
+            let entries
+            if(req.query.method === "title") {
+                entries = await Secret.find({ entryTitle: { "$regex": term } }).limit(parseInt(req.query.limit)).skip(parseInt(req.query.skip))
+            } else if(req.query.method === "body") {
+                entries = await Secret.find({ entryBody: { "$regex": term } }).limit(parseInt(req.query.limit)).skip(parseInt(req.query.skip))
+            }
+
+            let entries_to_send = []
+            for(let i = 0; i < entries.length; i++) {
+                const user = await User.findOne({ _id: entries[i].owner_id })
+
+                if(user.blocked.includes(req.user._id.toString())) {
+                    continue
+                } else if(entries[i].isPublic === false && entries[i].owner_id === req.user._id.toString()) {
+                    continue
+                } else if(user.private && user.followers.includes(req.user._id.toString()) === false && user._id.toString() !== req.user._id.toString()) {
+                    continue
+                }
+
+                entries_to_send.push(entries[i])
+            }
+
+            return res.send({
+                entries: user_utils.hidePropsInArray(entries_to_send, postConstants.props_to_hide_query)
+            })
+
+
+        } catch (error) {
+            console.log(error)
+            return res.status(500).send({ error: "Internal server error" })
+        }
+    },
 }

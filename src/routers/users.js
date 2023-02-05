@@ -18,6 +18,7 @@ router.post("/profile/requests/:username/accept", auth, validateBlocked, users_c
 router.post("/profile/requests/:username/reject", auth, validateBlocked, users_controller.rejectFollowRequest)
 router.post("/profile/followers/:username/remove", auth, validateBlocked, users_controller.removeFollower)
 router.get("/users/:username", auth, validateBlocked, users_controller.getProfile)
+router.get("/users/:username/min", auth, validateBlocked, users_controller.getProfile_min)
 router.get("/users/:username/profile-image", auth, validateBlocked, users_controller.getOtherUserProfileImage)
 router.get("/users/search/:term", auth, users_controller.queryUsers)
 module.exports = router

@@ -9,10 +9,14 @@ const secretSchema = new mongoose.Schema({
     entryTitle: {
         type: String,
         required: true,
+        maxLength: [ 300, "Title too long" ],
+        minLength: [ 5, "Title too short" ]
     },
     entryBody: {
         type: String,
-        required: true
+        required: true,
+        maxLength: [ 40000, "Body too Long" ],
+        minLength: [ 5, "Body too short" ]
     },
     edited: {
         type: Boolean,

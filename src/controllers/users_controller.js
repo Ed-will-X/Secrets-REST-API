@@ -198,9 +198,29 @@ module.exports = {
             return res.status(500).send({ error: "Internal server error" })
         }
     },
+    getProfile_min: async(req, res)=> {
+        try {
+            const user = await User.findOne({ username: req.params.username })
+
+            if(user.private && user.followers.includes(req.user._id) === false) {
+                return res.send({
+                    user: userUtils.hide_props_in_js_object(user.toObject(), userConstants.private_data)
+                })
+            }
+
+            return res.send({ user: userUtils.hide_props_in_js_object(user.toObject(), userConstants.search_data_to_hide) })
+        } catch (error) {
+            console.log(error)
+            return res.status(500).send({ error: "Internal server error" })
+        }
+    },
     getOtherUserProfileImage: async(req, res) => {
         try {
             const user = await User.findOne({ username: req.params.username })
+
+            if(user.profileImage === undefined) {
+                return res.status(404).send({ error: "Image not found" })
+            }
 
             res.set("Content-Type", "image/png")
 
@@ -212,21 +232,29 @@ module.exports = {
     queryUsers: async(req, res) => {
         try {
             const term = req.params.term
-            if(term === "") {
-                return res.send([])
+
+            if(term.length < 3) {
+                return res.send({
+                    users: []
+                })
             }
 
             let users = await User.find({ username: { "$regex": term } }).limit(parseInt(req.query.limit)).skip(parseInt(req.query.skip))
 
+            let users_to_send = []
             for(let i = 0; i < users.length; i++) {
                 if(users[i].username === req.user.username) {
-                    users.splice(i, 1)
+                    // users.splice(i, 1)
+                    continue
                 } else if(users[i].blocked.includes(req.user._id.toString())) {
-                    users.splice(i, 1)
+                    // users.splice(i, 1)
+                    continue
                 }
+
+                users_to_send.push(users[i])
             }
 
-            return res.send({ user: userUtils.hidePropsInArray(users, userConstants.search_data_to_hide) })
+            return res.send({ users: userUtils.hidePropsInArray(users_to_send, userConstants.search_data_to_hide) })
 
         } catch(e) {
             console.log(e)

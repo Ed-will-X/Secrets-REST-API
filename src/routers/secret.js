@@ -39,6 +39,9 @@ router.delete("/secrets/:id/:comment", auth, validateRequest_post, secretsContro
 router.post("/secrets/:id/:comment/like", auth, validateRequest_post, secretsController.likeComment)
 router.post("/secrets/:id/:comment/unlike", auth, validateRequest_post, secretsController.unlikeComment)
 router.patch("/secrets/:id/:comment", auth, validateRequest_post, secretsController.editComment)
-
+router.get("/secrets/:id", auth, validateRequest_post, secretsController.getEntry)
+router.get("/secrets/:id/min", auth, validateRequest_post, secretsController.getEntry_min)
+router.get("/secrets/:id/image", auth, validateRequest_post, secretsController.getEntry_image)
+router.get("/secrets/search/:term", auth, secretsController.queryEntries)
 
 module.exports = router

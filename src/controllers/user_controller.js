@@ -52,7 +52,7 @@ module.exports = {
             req.user.imageChangeTimestamp = Date.now()
 
             await req.user.save()
-            return res.send("Image upload successful")
+            return res.status(201).send("Image upload successful")
         } catch (error) {
             console.log(error)
             return res.status(500).send({ error: "Internal server error" })
@@ -72,8 +72,12 @@ module.exports = {
     },
     getCurrentUserProfileImage: async(req, res) => {
         try {
-            res.set("Content-Type", "image/png")
+            
+            if(req.user.profileImage === undefined) {
+                return res.status(404).send({ error: "Image not found" })
+            }
 
+            res.set("Content-Type", "image/png")
             return res.send(req.user.profileImage)
         } catch (error) {
             console.log(error)

@@ -1,7 +1,7 @@
 const express = require("express")
 const userRouter = require("./routers/user")
 const usersRouter = require("./routers/users")
-const secretsRouter = require("./routers//secret")
+const secretsRouter = require("./routers/secret")
 require("./db/mongoose")
 
 const app = express()

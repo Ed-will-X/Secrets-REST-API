@@ -78,7 +78,7 @@ const validate_action_between_users_post = (UserSchema, PostSchema) => {
                 return res.status(404).send({ error: "User not found" })
             }
             
-            if(user.private && user.followers.includes(req.user._id) === false) {
+            if(user.private && user.followers.includes(req.user._id.toString()) === false && user._id.toString() !== req.user._id.toString()) {
                 return res.status(401).send({ error: "Lack of authorisation to perform this operation on this user" })
             }
 
