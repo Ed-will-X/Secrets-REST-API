@@ -586,6 +586,12 @@ module.exports = {
             console.log(error)
             return res.status(500).send({ error: "Internal server error" })
         }
+    },
+    get_fyp_secrets: async(req, res) => {
+        
+    },
+    get_following_secrets: async(req, res) => {
+        
     }
 
 }
