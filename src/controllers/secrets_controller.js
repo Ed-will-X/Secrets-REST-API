@@ -42,6 +42,10 @@ module.exports = {
                 isPublic: req.body.isPublic
             })
 
+            if(secret.mediaType === "none") {
+                secret.shadowBan = false
+            }
+
             await secret.save()
 
 
@@ -442,10 +446,146 @@ module.exports = {
                 entries: user_utils.hidePropsInArray(entries_to_send, postConstants.props_to_hide_query)
             })
 
-
         } catch (error) {
             console.log(error)
             return res.status(500).send({ error: "Internal server error" })
         }
     },
+    replyComment: async(req, res) => {
+        try {
+            const entry = await Secret.findOne({ _id: req.params.id })
+            const comment = userUtils.findObj(req.params.comment, entry.comments)
+
+            if(comment === false) {
+                return res.status(404).send("Comment does not exist")
+            }
+
+            if(req.body.reply === undefined) {
+                return res.status(400).send({ error: "Comment must not be null" })
+            }
+
+            const _id = new mongoose.Types.ObjectId()
+            const reply = {
+                user: req.user._id.toString(),
+                _id: _id,
+                comment: req.body.reply
+            }
+
+            const commentIdx = userUtils.findIndexOfObj(req.params.comment, entry.comments)
+            entry.comments[commentIdx].replies.push(reply)
+
+            await entry.save()
+
+            return res.send(_id)
+        } catch (error) {
+            console.log(error)
+            return res.status(500).send({ error: "Internal server error" })
+        }
+    },
+    likeCommentReply: async(req, res)=> {
+        try {
+            const entry = await Secret.findOne({ _id: req.params.id })
+            const comment = userUtils.findObj(req.params.comment, entry.comments)
+
+            if(comment === false) {
+                return res.status(404).send("Comment does not exist")
+            }
+
+            const commentIdx = userUtils.findIndexOfObj(req.params.comment, entry.comments)
+            const replyIdx = userUtils.findIndexOfObj(req.params.reply, entry.comments[commentIdx].replies)
+
+            if(entry.comments[commentIdx].replies[replyIdx].likes.includes(req.user._id.toString())) {
+                return res.send("Comment reply already liked")
+            }
+            // console.log(entry.comments[commentIdx].replies[replyIdx].comment)
+            entry.comments[commentIdx].replies[replyIdx].likes.push(req.user._id.toString())
+
+            await entry.save()
+
+            return res.send("comment reply liked")
+        } catch (error) {
+            console.log(error)
+            return res.status(500).send({ error: "Internal server error" })
+        }
+    },
+    unlikeCommentReply: async(req, res) => {
+        try {
+            const entry = await Secret.findOne({ _id: req.params.id })
+            const comment = userUtils.findObj(req.params.comment, entry.comments)
+
+            if(comment === false) {
+                return res.status(404).send("Comment does not exist")
+            }
+
+            const commentIdx = userUtils.findIndexOfObj(req.params.comment, entry.comments)
+            const replyIdx = userUtils.findIndexOfObj(req.params.reply, entry.comments[commentIdx].replies)
+
+            if(entry.comments[commentIdx].replies[replyIdx].likes.includes(req.user._id.toString()) === false) {
+                return res.send("Comment reply already not liked")
+            }
+            userUtils.removeIDFromArray(req.user._id.toString(), entry.comments[commentIdx].replies[replyIdx].likes)
+
+            await entry.save()
+
+            return res.send("comment reply unliked")
+        } catch (error) {
+            console.log(error)
+            return res.status(500).send({ error: "Internal server error" })
+        }
+    },
+    deleteCommentReply: async(req, res) => {
+        try{
+            const entry = await Secret.findOne({ _id: req.params.id })
+            const comment = userUtils.findObj(req.params.comment, entry.comments)
+
+            if(comment === false) {
+                return res.status(404).send("Comment does not exist")
+            }
+            const commentIdx = userUtils.findIndexOfObj(req.params.comment, entry.comments)
+            const reply = userUtils.findObj(req.params.reply, entry.comments[commentIdx].replies)
+
+            if(reply === false) {
+                return res.status(404).send("Reply does not exist")
+            }
+
+            entry.comments[commentIdx].replies = entry.comments[commentIdx].replies.filter((reply)=> {
+                return reply._id.toString() !== req.params.reply
+            })
+
+            await entry.save()
+
+            return res.send("Deleted")
+        } catch(error) {
+            console.log(error)
+            return res.status(500).send({ error: "Internal server error" })
+        }
+    },
+    editCommentReply: async(req, res) => {
+        try {
+            const entry = await Secret.findOne({ _id: req.params.id })
+            const comment = userUtils.findObj(req.params.comment, entry.comments)
+
+            if(comment === false) {
+                return res.status(404).send("Comment does not exist")
+            }
+
+            if(req.body.reply === undefined) {
+                return res.status(400).send({ error: "Comment must not be null" })
+            }
+
+            const commentIdx = userUtils.findIndexOfObj(req.params.comment, entry.comments)
+            const replyIdx = userUtils.findIndexOfObj(req.params.reply, entry.comments[commentIdx].replies)
+
+            entry.comments[commentIdx].replies[replyIdx].edited = true
+            entry.comments[commentIdx].replies[replyIdx].comment = req.body.reply
+
+            await entry.save()
+
+            return res.send("edited")
+        } catch (error) {
+            console.log(error)
+            return res.status(500).send({ error: "Internal server error" })
+        }
+    }
+
 }

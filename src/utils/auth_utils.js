@@ -72,14 +72,23 @@ const validate_action_between_users_post = (UserSchema, PostSchema) => {
                 return res.status(404).send({ error: "Post not found" })
             }
 
-            const user = await UserSchema.findOne({ owner_id: post.owner_id })
+            const user = await UserSchema.findOne({ _id: post.owner_id })
 
             if(user == null) {
                 return res.status(404).send({ error: "User not found" })
             }
             
-            if(user.private && user.followers.includes(req.user._id.toString()) === false && user._id.toString() !== req.user._id.toString()) {
-                return res.status(401).send({ error: "Lack of authorisation to perform this operation on this user" })
+            if(user.private && user.followers.includes(req.user._id.toString()) === false) {
+                if(user._id.toString() !== req.user._id.toString()) {
+                    console.log("------------------------")
+                    console.log(`private: ${user.private}`)
+                    console.log(`Is a follower: ${user.followers.includes(req.user._id.toString())}`)
+                    console.log(`Is user current user: ${user._id.toString() !== req.user._id.toString()}`)
+                    console.log(`Owner Id: ${post.owner_id}`)
+                    console.log(`User Id: ${user._id}`)
+                    console.log(`req.user._id: ${req.user._id}`)
+                    return res.status(401).send({ error: "Lack of authorisation to perform this operation on this user" })
+                }
             }
 
             if(user.blocked.includes(req.user._id.toString())) {

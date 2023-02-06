@@ -44,4 +44,10 @@ router.get("/secrets/:id/min", auth, validateRequest_post, secretsController.get
 router.get("/secrets/:id/image", auth, validateRequest_post, secretsController.getEntry_image)
 router.get("/secrets/search/:term", auth, secretsController.queryEntries)
 
+router.post("/secrets/:id/:comment/reply", auth, validateRequest_post, secretsController.replyComment)
+router.post("/secrets/:id/:comment/:reply/like", auth, validateRequest_post, secretsController.likeCommentReply)
+router.post("/secrets/:id/:comment/:reply/unlike", auth, validateRequest_post, secretsController.unlikeCommentReply)
+router.patch("/secrets/:id/:comment/:reply", auth, validateRequest_post, secretsController.editCommentReply)
+router.delete("/secrets/:id/:comment/:reply", auth, validateRequest_post, secretsController.deleteCommentReply)
+
 module.exports = router
