@@ -53,7 +53,7 @@ module.exports = {
             })
 
             await req.user.save()
-            return res.send()
+            return res.send("Signed out")
         } catch (error) {
             console.log(error)
             res.status(500).send({ error: "Internal Server Error" })
@@ -63,7 +63,7 @@ module.exports = {
         try {
             req.user.tokens = []
             await req.user.save()
-            return res.send()
+            return res.send("Signed all out")
         } catch (error) {
             console.log({ error: "Internal server error" })
             return res.status(500).send({ error: "Internal server error" })

@@ -101,7 +101,7 @@ const userSchema = new mongoose.Schema({
         type: Array,
         default: []
     },
-    updatePrivaceMethod: {  // [ "none", "share_with", "share_with_all_except" ]
+    updatePrivacyMethod: {  // [ "none", "share_with", "share_with_all_except" ]
         type: String,
         required: true,
         default: "none"
