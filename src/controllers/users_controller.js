@@ -3,6 +3,7 @@ const mongoose = require("mongoose")
 const User = require("../models/User")
 const userConstants = require("../constants/user_constants")
 const userUtils = require("../utils/user_utils")
+const authUtils = require("../utils/auth_utils")
 
 module.exports = {
     follow: async(req, res) => {
@@ -256,6 +257,50 @@ module.exports = {
 
             return res.send({ users: userUtils.hidePropsInArray(users_to_send, userConstants.search_data_to_hide) })
 
+        } catch(e) {
+            console.log(e)
+            return res.status(500).send({ error: "Internal server error" })
+        }
+    },
+    checkUsernameValidity: async(req, res)=> {
+        try {
+            const user = await User.findOne({ username: req.params.username })
+
+            if(req.params.username == undefined) {
+                return res.status(400).send({ error: "Username must not be empty" })
+            }
+
+            if(!authUtils.isValidUsername(req.params.username)) {
+                return res.send(false)
+            }
+
+            if(user == null) {
+                return res.send(true)
+            } else {
+                return res.send(false)
+            }
+        } catch(e) {
+            console.log(e)
+            return res.status(500).send({ error: "Internal server error" })
+        }
+    },
+    checkEmailValidity: async(req, res)=> {
+        try {
+            const user = await User.findOne({ email: req.params.email })
+
+            if(req.params.email == undefined) {
+                return res.status(400).send({ error: "Email must not be empty" })
+            }
+
+            if(req.params.email.includes(" ")) {
+                return res.send(false)
+            }
+
+            if(user == null) {
+                return res.send(true)
+            } else {
+                return res.send(false)
+            }
         } catch(e) {
             console.log(e)
             return res.status(500).send({ error: "Internal server error" })

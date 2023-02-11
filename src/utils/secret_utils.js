@@ -109,11 +109,50 @@ const check_future_date = (date) => {
     }
 }
 
+const check_past_date = (date) => {
+    // const today = "2023-01-28"  // TODO: Find a way to get today's date
+    var datetime = new Date();
+    const today = `${datetime.getFullYear()}-${datetime.getMonth() + 1}-${datetime.getDate()}`
+    console.log(`Today is ${today}`)
+    const dateArr = date.split("-")
+    const todayArr = today.split("-")
+    
+    
+    if(parseInt(dateArr[0]) < parseInt(todayArr[0])) {
+        console.log("Year is less than current year")
+        return false
+    } else if(parseInt(dateArr[0]) === parseInt(todayArr[0])) {
+        if(parseInt(dateArr[1]) < parseInt(todayArr[1])) {
+            console.log("Month is less than than current month")
+            return false
+        } else if(parseInt(dateArr[1]) === parseInt(todayArr[1])) {
+            if(parseInt(dateArr[2]) < parseInt(todayArr[2]) - 1) {
+                console.log("Day is less than current day")
+                return false
+            } else if(parseInt(dateArr[2]) === parseInt(todayArr[2])) {
+                return true
+            } else {
+                return true
+            }
+        }else {
+            return true
+        }
+    } else {
+        return true
+    }
+}
+
 const check_absurd_date = (date) => {
     const dateArr = date.split("-")
     const months_with_30_days = [ 9, 4, 6, 11 ]
     const months_with_31_days = [ 1, 3, 5, 7, 8, 10, 12 ]
-    
+
+    // Year validity check
+    if(parseInt(dateArr[0]) < 1945) {
+        console.log("Year must be above 1945")
+        return false
+    }
+
     // Month validity check
     if(parseInt(dateArr[1]) < 1 || parseInt(dateArr[1]) > 12) {
         console.log("Month must be between 1 and 12")
@@ -140,8 +179,14 @@ const check_absurd_date = (date) => {
     
     // validates leap year feburary
     if(parseInt(dateArr[0]) % 4 === 0 && parseInt(dateArr[1]) === 2 && parseInt(dateArr[2]) > 29) {
-        console.log(`Day in month ${parseInt(dateArr[1])} must not exceed 29 in a leap year`)
-        return false
+        if(dateArr[0] % 400 === 0 && parseInt(dateArr[1]) === 2 && parseInt(dateArr[2]) > 29) {
+            console.log(`Day in month ${parseInt(dateArr[1])} must not exceed 29 in a leap year`)
+            return false
+            // validates non-leap year feburary
+        } else if(dateArr[0] % 100 === 0 && parseInt(dateArr[1]) === 2 && parseInt(dateArr[2]) > 28) {
+            console.log(`Day in month ${parseInt(dateArr[1])} must not exceed 28`)
+            return false
+        }
     }
     
     // validates non-leap year feburary
@@ -152,12 +197,50 @@ const check_absurd_date = (date) => {
     
     
     return true
-  }
+}
+
+const isValidTag = (tag) => {
+    const allowed = "abcdefghijklmnopqrstuvwxyz1234567890-_.".split("")
+    
+    if(tag.length < 3 || tag.length > 20) {
+      return false
+    }
+    
+    
+    const isValid = tag.split("").every((letter)=> {
+      if(allowed.includes(letter)) {
+        return true
+      } else {
+        return false
+      }
+    })
+    
+    return isValid
+
+}
+
+/**
+ * 
+ * @param {*} weather 
+ * @param {*} allowed 
+ */
+const validateWeather = (weather, allowed) => {
+    for(let value of allowed) {
+        if(weather.toLowerCase() === value) {
+            return true
+        }
+    }
+
+    return false
+}
 
 const check_DOB_validity = () => {
 
 }
 
 module.exports = {
-    validate_post_upload
+    validate_post_upload,
+    check_past_date,
+    isValidTag,
+    validateWeather
 }

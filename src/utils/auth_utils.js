@@ -178,6 +178,26 @@ function hashPassword(Schema) {
     })
 }
 
+const isValidUsername = (username) => {
+    const allowed = "abcdefghijklmnopqrstuvwxyz1234567890-_.".split("")
+    
+    if(username.length < 3 || username.length > 20) {
+      return false
+    }
+    
+    
+    const isValid = username.split("").every((letter)=> {
+      if(allowed.includes(letter)) {
+        return true
+      } else {
+        return false
+      }
+    })
+    
+    return isValid
+
+}
+
 module.exports = {
     verifyToken,
     hashPassword,
@@ -185,5 +205,6 @@ module.exports = {
     validate_action_between_users,
     validate_action_between_users_blocked,
     validate_action_between_users_post,
-    validate_current_user_post_action
+    validate_current_user_post_action,
+    isValidUsername
 }

@@ -21,4 +21,8 @@ router.get("/users/:username", auth, validateBlocked, users_controller.getProfil
 router.get("/users/:username/min", auth, validateBlocked, users_controller.getProfile_min)
 router.get("/users/:username/profile-image", auth, validateBlocked, users_controller.getOtherUserProfileImage)
 router.get("/users/search/:term", auth, users_controller.queryUsers)
+
+router.get("/users/check-username-validity/:username", users_controller.checkUsernameValidity)
+router.get("/users/check-email-validity/:email", users_controller.checkEmailValidity)
+
 module.exports = router

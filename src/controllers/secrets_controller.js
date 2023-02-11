@@ -7,14 +7,31 @@ const userConstants = require("../constants/user_constants")
 const postConstants = require("../constants/post_constants")
 const user_utils = require("../utils/user_utils")
 const users_controller = require("./users_controller")
+const secret_utils = require("../utils/secret_utils")
 
 module.exports = {
     uploadSecret: async(req, res) => {
         try {
             const _id = mongoose.Types.ObjectId()
 
+            if(req.body.weather == undefined) {
+                return res.status(400).send({ error: "You must input a weather" })
+            }
+
+            if(!secret_utils.validateWeather(req.body.weather, postConstants.allowed_weather)) {
+                return res.status(400).send({ error: "Invalid weather" })
+            }
+
+            if(req.body.tags == undefined) {
+                return res.status(400).send({ error: "You must add tags" })
+            }
+
             if(req.body.tags.length > 10) {
                 return res.status(400).send({ error: "You can't upload more than 10 tags" })
+            }
+
+            if(req.body.tags.length < 2) {
+                return res.status(400).send({ error: "You must add at lease one tag" })
             }
 
             let sanitised_tags = []
@@ -23,6 +40,11 @@ module.exports = {
                     if(req.body.tags[i] === "") {
                         continue
                     }
+
+                    if(!secret_utils.isValidTag(req.body.tags[i])) {
+                        continue
+                    }
+
                     sanitised_tags.push(req.body.tags[i].toLowerCase())
                 }
             }
@@ -38,6 +60,7 @@ module.exports = {
                 tags: tags_to_store,
                 NSFW: req.body.NSFW,
                 mediaType: req.body.mediaType,
+                weather: req.body.weather,
                 _id: _id,
                 isPublic: req.body.isPublic
             })
@@ -46,17 +69,24 @@ module.exports = {
                 secret.shadowBan = false
             }
 
+            if(secret_utils.check_past_date(req.body.date) === false) {
+                secret.retroactive = true
+            }
+
             await secret.save()
 
-
             setTimeout(async()=> {
-                // Fetch secret with ID
-                const secret = await Secret.findOne({ _id: _id })
-                // if it has a media type, check if the media type is stored in the secret object
-                if(secret.mediaType === "image" && secret.entryImage == null) {
-                    // If media type is not stored in the appropriate format, delete the secret
-                    await secret.remove()
-                    console.log("Secret has been removed")
+                try {
+                    // Fetch secret with ID
+                    const secret = await Secret.findOne({ _id: _id })
+                    // if it has a media type, check if the media type is stored in the secret object
+                    if(secret.mediaType === "image" && secret.entryImage == null) {
+                        // If media type is not stored in the appropriate format, delete the secret
+                        await secret.remove()
+                        console.log("Secret has been removed")
+                    }
+                } catch(e) {
+                    console.log(e)
                 }
             }, 60000)
             return res.status(201).send({ 

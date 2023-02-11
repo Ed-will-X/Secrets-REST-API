@@ -3,16 +3,22 @@ const mongoose = require("mongoose")
 const User = require("../models/User")
 const userConstants = require("../constants/user_constants")
 const userUtils = require("../utils/user_utils")
+const auth_utils = require("../utils/auth_utils")
 
 module.exports = {
     signUp: async (req, res) => {
-        const user = new User({
-            username: req.body.username,
-            email: req.body.email,
-            password: req.body.password,
-        })
-
         try {
+
+            if(!auth_utils.isValidUsername(req.body.username)) {
+                return res.status(400).send({ error: "Username is invalid" })
+            }
+
+            const user = new User({
+                username: req.body.username,
+                email: req.body.email,
+                password: req.body.password,
+            })
+
             await user.save()
 
             const token = await user.generateToken()
@@ -27,10 +33,9 @@ module.exports = {
         }
     },
     signIn: async(req, res) => {
-        const user = await User.findByCredentials(req.body.email, req.body.password)
-
-
         try {
+            const user = await User.findByCredentials(req.body.email, req.body.password)
+
             if(!user.isError) {
                 const token = await user.generateToken()
     

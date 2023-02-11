@@ -18,6 +18,10 @@ const secretSchema = new mongoose.Schema({
         maxLength: [ 40000, "Body too Long" ],
         minLength: [ 5, "Body too short" ]
     },
+    weather: {
+        type: String,
+        required: true
+    },
     edited: {
         type: Boolean,
         required: true,
@@ -68,6 +72,11 @@ const secretSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: false
+    },
+    retroactive: {
+        type: Boolean,
+        required: true,
+        default: false
     },
     shadowBan: {
         type: Boolean,
