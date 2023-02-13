@@ -6,7 +6,9 @@ const secretsController = require("../controllers/secrets_controller")
 const validatePostUpload = require("../middlewares/validatePostUpload")
 const validateRequest_post = require("../middlewares/validateRequestPost")
 const validateRequest_currentUser_post = require("../middlewares/validateRequest_CurrentUserPost")
+const validateBlocked = require("../middlewares/validateBlocked")
 const auth = require("../middlewares/auth")
+const validateRequest = require("../middlewares/validateRequest")
 
 const router = express.Router()
 
@@ -29,7 +31,7 @@ router.post("/profile/secrets/:secret/upload-entry-image", auth, validateRequest
 })
 router.post("/secrets/:id/like", auth, validateRequest_post, secretsController.likeSecret)
 router.post("/secrets/:id/unlike", auth, validateRequest_post, secretsController.unlikeSecret)
-router.delete("/profile/secrets/:id/delete", auth, validateRequest_currentUser_post, secretsController.deleteEntry)
+router.delete("/profile/secrets/:secret/delete", auth, validateRequest_currentUser_post, secretsController.deleteEntry)
 router.patch("/profile/secrets/:secret", auth, validateRequest_currentUser_post, secretsController.editSecret)
 
 router.post("/profile/saved/:id", auth, validateRequest_post, secretsController.savePost)
@@ -49,5 +51,8 @@ router.post("/secrets/:id/:comment/:reply/like", auth, validateRequest_post, sec
 router.post("/secrets/:id/:comment/:reply/unlike", auth, validateRequest_post, secretsController.unlikeCommentReply)
 router.patch("/secrets/:id/:comment/:reply", auth, validateRequest_post, secretsController.editCommentReply)
 router.delete("/secrets/:id/:comment/:reply", auth, validateRequest_post, secretsController.deleteCommentReply)
+
+router.get("/users/:username/posts", auth, validateRequest, secretsController.getEntriesForUser)
+router.get("/profile/posts", auth, secretsController.getEntriesForUser)
 
 module.exports = router

@@ -84,11 +84,15 @@ module.exports = {
                         // If media type is not stored in the appropriate format, delete the secret
                         await secret.remove()
                         console.log("Secret has been removed")
+                    } else {
+                        req.user.NSFW = true
+                        await req.user.save()
                     }
                 } catch(e) {
                     console.log(e)
                 }
             }, 60000)
+
             return res.status(201).send({ 
                 _id: _id
              })
@@ -201,9 +205,23 @@ module.exports = {
     },
     deleteEntry: async(req, res) => {
         try {
-            const secret = await Secret.findOne({ _id: req.params.id })
-
+            const secret = await Secret.findOne({ _id: req.params.secret })
             await secret.remove()
+
+            ///// TODO: Add remove NSFW if all posts contain no NSFW
+
+            // const secrets = await Secret.find({ owner_id: req.user._id.toString() })
+            // for(let i of secrets) {
+            //     if(i._id.toString() === req.params.secret) {
+            //         continue
+            //     }
+            //     if(i.NSFW) {
+            //         break
+            //     }
+                
+            //     req.user.NSFW = false
+            //     await req.user.save()
+            // }
 
             return res.send("Entry removed")
         } catch (error) {
@@ -407,6 +425,75 @@ module.exports = {
             return res.status(500).send({ error: "Internal server error" })
         }
     },
+    getEntriesForUser: async(req, res) => {
+        try {
+            let user;
+            if(req.params.username !== undefined) {
+                user = await User.findOne({ username: req.params.username })
+            } else {
+                user = await User.findOne({ username: req.user.username })
+                console.log(user.username)
+            }
+            const entries = await Secret.find({ owner_id: user._id.toString() }).limit(parseInt(req.query.limit)).skip(parseInt(req.query.skip))
+            
+            if(req.query.method === "year") {
+                
+                const post_IDs = [] // Arr of objects
+
+                if(req.query.year === undefined) {
+                    return res.status(400).send({ error: "Year must not be null" })
+                }
+
+                entries.forEach((entry)=> {
+
+                    if(secret_utils.extractYear(entry.date) === req.query.year) {
+                        if(entry.isPublic || entry.owner_id.toString() === req.user._id.toString()) {
+                            post_IDs.push({
+                                _id: entry._id,
+                                date: entry.date
+                            })
+                        }
+                    }
+                })
+
+
+                return res.send({ posts: post_IDs })
+            }
+
+            if(req.query.method === "month") {
+                const post_IDs = [] // Arr of objects
+
+                if(req.query.year === undefined) {
+                    return res.status(400).send({ error: "Year must not be null" })
+                }
+
+                if(req.query.month === undefined) {
+                    return res.status(400).send({ error: "Month must not be null" })
+                }
+
+                entries.forEach((entry)=> {
+                    if(secret_utils.extractYear(entry.date) === req.query.year && parseInt(secret_utils.extractMonth(entry.date)) === parseInt(req.query.month)) {
+                        if(entry.isPublic || entry.owner_id.toString() === req.user._id.toString()) {
+                            post_IDs.push({
+                                _id: entry._id,
+                                date: entry.date
+                            })
+                        }
+                    }
+                })
+
+
+                return res.send({ posts: post_IDs })
+            }
+
+            return res.status(400).send({ error: "Enter a valid query method" })
+
+            
+        } catch (e) {
+            console.log(e)
+            return res.status(500).send({ error: "Internal server error" })
+        }
+    },
     getEntry_min: async(req, res) => {
         try {
             const entry = await Secret.findOne({ _id: req.params.id })
@@ -466,6 +553,8 @@ module.exports = {
                 } else if(entries[i].isPublic === false && entries[i].owner_id === req.user._id.toString()) {
                     continue
                 } else if(user.private && user.followers.includes(req.user._id.toString()) === false && user._id.toString() !== req.user._id.toString()) {
+                    continue
+                } else if(!entries[i].isPublic) {
                     continue
                 }
 

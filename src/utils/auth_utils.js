@@ -72,6 +72,10 @@ const validate_action_between_users_post = (UserSchema, PostSchema) => {
                 return res.status(404).send({ error: "Post not found" })
             }
 
+            if(!post.isPublic) {
+                return res.status(404).send({ error: "Post not found" })
+            }
+
             const user = await UserSchema.findOne({ _id: post.owner_id })
 
             if(user == null) {
@@ -80,13 +84,6 @@ const validate_action_between_users_post = (UserSchema, PostSchema) => {
             
             if(user.private && user.followers.includes(req.user._id.toString()) === false) {
                 if(user._id.toString() !== req.user._id.toString()) {
-                    console.log("------------------------")
-                    console.log(`private: ${user.private}`)
-                    console.log(`Is a follower: ${user.followers.includes(req.user._id.toString())}`)
-                    console.log(`Is user current user: ${user._id.toString() !== req.user._id.toString()}`)
-                    console.log(`Owner Id: ${post.owner_id}`)
-                    console.log(`User Id: ${user._id}`)
-                    console.log(`req.user._id: ${req.user._id}`)
                     return res.status(401).send({ error: "Lack of authorisation to perform this operation on this user" })
                 }
             }
@@ -107,7 +104,7 @@ const validate_current_user_post_action = (PostSchema) => {
     return async(req, res, next) => {
         try {
             const secret = await PostSchema.findOne({ _id: req.params.secret })
-
+            
             if(secret == null) {
                 return res.status(404).send({ error: "Entry not found" })
             }

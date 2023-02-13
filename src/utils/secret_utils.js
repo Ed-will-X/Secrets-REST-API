@@ -238,9 +238,19 @@ const check_DOB_validity = () => {
 
 }
 
+const extractMonth = (date) => {
+    return date.split("-")[1]
+}
+
+const extractYear = (date) => {
+    return date.split("-")[0]
+}
+
 module.exports = {
     validate_post_upload,
     check_past_date,
     isValidTag,
-    validateWeather
+    validateWeather,
+    extractMonth,
+    extractYear
 }

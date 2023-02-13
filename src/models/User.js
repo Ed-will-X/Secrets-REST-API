@@ -26,6 +26,11 @@ const userSchema = new mongoose.Schema({
             }
         }
     },
+    about: {
+        type: String,
+        maxLength: 150,
+        required: false
+    },
     password: {
         type: String,
         required: true,
